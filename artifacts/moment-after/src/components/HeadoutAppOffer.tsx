@@ -120,6 +120,7 @@ export default function HeadoutAppOffer({
           </button>
         </div>
       </motion.div>
+      <div className="h-4 shrink-0" />
     </div>
   );
 }

@@ -144,7 +144,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-            className="absolute bottom-0 left-0 w-full h-[460px] bg-white border-t border-[#ECECEF] flex flex-col z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-2xl overflow-hidden"
+            className={`absolute bottom-0 left-0 w-full ${channel === 'app' ? 'h-[calc(100%-44px)]' : 'h-[460px]'} bg-white border-t border-[#ECECEF] flex flex-col z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-2xl overflow-hidden`}
           >
             {/* Shared top bar: back + channel switch */}
             <div className="bg-white px-3 py-2.5 flex items-center gap-2 shrink-0 border-b border-[#ECECEF]">
