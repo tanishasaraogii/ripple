@@ -51,9 +51,9 @@ export default function ScreenSummary({ onRestart }: { onRestart: () => void }) 
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <div className="text-3xl font-extrabold tracking-tight mb-3 text-[#E5006E]">&lt; 60s Latency</div>
+            <div className="text-3xl font-extrabold tracking-tight mb-3 text-[#E5006E]">Same-day perk</div>
             <div className="text-[#6B6B76] text-lg leading-relaxed font-medium">
-              From the moment an experience ends to the notification hitting their pocket.
+              A finish-line discount they can only use today turns idle intent into a second booking on the spot.
             </div>
           </motion.div>
         </div>

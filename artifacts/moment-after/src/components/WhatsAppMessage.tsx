@@ -1,10 +1,14 @@
-import { Guest, Recommendation } from '../lib/data';
+import { Guest, Recommendation, discountedPrice } from '../lib/data';
 import { motion } from 'framer-motion';
 
 export default function WhatsAppMessage({ guest, recommendation }: { guest: Guest, recommendation: Recommendation }) {
-  const priceLine = recommendation.price === 0 
-    ? "Free · Books in 30 seconds 👇" 
-    : `€${recommendation.price} · Books in 30 seconds 👇`;
+  const finalPrice = discountedPrice(recommendation);
+  const hasDiscount = recommendation.discount_pct > 0 && finalPrice < recommendation.price;
+  const priceLine = finalPrice === 0
+    ? "Free · Books in 30 seconds 👇"
+    : hasDiscount
+      ? `Just for finishing today: ${recommendation.discount_pct}% off → €${finalPrice} (was €${recommendation.price}) 👇`
+      : `€${finalPrice} · Books in 30 seconds 👇`;
 
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 

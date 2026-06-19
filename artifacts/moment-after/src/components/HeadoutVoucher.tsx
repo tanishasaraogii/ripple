@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Guest, Recommendation } from '../lib/data';
+import { Guest, Recommendation, discountedPrice } from '../lib/data';
 
 function PseudoQR({ seed }: { seed: string }) {
   const size = 21;
@@ -147,6 +147,29 @@ export default function HeadoutVoucher({
           <Detail label="Start time" value={startTime} />
           <Detail label="Duration" value="2 hours" />
           <Detail label="Distance" value={`${recommendation.distance_minutes} min walk`} />
+          <Detail
+            label="Amount paid"
+            value={
+              recommendation.discount_pct > 0 ? (
+                <span className="flex items-baseline gap-1.5">
+                  <span>€{discountedPrice(recommendation)}</span>
+                  <span className="text-[12px] font-normal text-[#9A9AA3] line-through">€{recommendation.price}</span>
+                </span>
+              ) : (
+                `€${recommendation.price}`
+              )
+            }
+          />
+          {recommendation.discount_pct > 0 && (
+            <Detail
+              label="You saved"
+              value={
+                <span className="text-[#E5006E]">
+                  €{recommendation.price - discountedPrice(recommendation)} · {recommendation.discount_pct}% perk
+                </span>
+              }
+            />
+          )}
         </div>
 
         <div className="mt-5 border-l-[3px] border-primary bg-primary/[0.04] rounded-r-md px-4 py-3">
@@ -212,7 +235,7 @@ export default function HeadoutVoucher({
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Detail({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
       <div className="text-[12px] text-[#9A9AA3] mb-0.5">{label}</div>

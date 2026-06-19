@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GUESTS, getRecommendation } from '../lib/data';
+import { GUESTS, getRecommendation, discountedPrice } from '../lib/data';
 import WhatsAppMessage from './WhatsAppMessage';
 import HeadoutVoucher from './HeadoutVoucher';
 
@@ -11,6 +11,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [bookings, setBookings] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
   const [voucherOpen, setVoucherOpen] = useState<boolean>(false);
+  const [panelClosed, setPanelClosed] = useState<boolean>(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -24,6 +25,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     if (triggeredGuest && activeMessageId !== triggeredGuest.id) {
       setActiveMessageId(triggeredGuest.id);
       setVoucherOpen(false);
+      setPanelClosed(false);
     }
   }, [elapsedSeconds, activeMessageId]);
 
@@ -96,7 +98,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
       </div>
 
       <AnimatePresence>
-        {activeGuest && activeRec && (
+        {activeGuest && activeRec && !panelClosed && (
           <motion.div
             key={activeGuest.id}
             initial={{ y: "100%", opacity: 0 }}
@@ -107,6 +109,15 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
           >
             {/* Authentic WhatsApp Header */}
             <div className="bg-[#F0F2F5] px-4 py-3 flex items-center gap-3 shrink-0 border-b border-[#D1D7DB]">
+              <button
+                onClick={() => { setVoucherOpen(false); setPanelClosed(true); }}
+                className="text-[#54656f] hover:text-[#111B21] shrink-0 -ml-1"
+                aria-label="Back to live console"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
               <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center overflow-hidden shrink-0">
                 <svg viewBox="0 0 24 24" width="24" height="24" className="text-[#a6b0b5]" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path>
@@ -127,17 +138,33 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                 transition={{ delay: 0.8 }}
                 className="mt-4 bg-white p-4 rounded-xl border border-[#ECECEF] shadow-sm"
               >
-                <div className="text-sm font-bold text-[#2A2A33] mb-1">{activeRec.name}</div>
-                <div className="text-xs text-[#6B6B76] mb-4 font-medium">{activeRec.distance_minutes} min away · {activeRec.available_slots} slots left</div>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <div className="text-sm font-bold text-[#2A2A33]">{activeRec.name}</div>
+                  {activeRec.discount_pct > 0 && (
+                    <span className="shrink-0 text-[10px] font-bold text-[#E5006E] bg-[#E5006E]/10 border border-[#E5006E]/30 px-2 py-0.5 rounded-md uppercase tracking-wide">
+                      {activeRec.discount_pct}% off
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-[#6B6B76] mb-3 font-medium">{activeRec.distance_minutes} min away · {activeRec.available_slots} slots left</div>
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-lg font-extrabold text-[#2A2A33]">€{discountedPrice(activeRec)}</span>
+                  {activeRec.discount_pct > 0 && (
+                    <span className="text-sm text-[#9A9AA3] line-through">€{activeRec.price}</span>
+                  )}
+                  {activeRec.discount_pct > 0 && (
+                    <span className="text-xs text-[#E5006E] font-semibold">post-experience perk</span>
+                  )}
+                </div>
                 <button 
                   onClick={() => {
                     setBookings(b => b + 1);
-                    setRevenue(r => r + activeRec.price);
+                    setRevenue(r => r + discountedPrice(activeRec));
                     setVoucherOpen(true);
                   }}
                   className="w-full bg-primary text-white font-bold py-3 rounded-lg text-sm active:scale-[0.98] transition-transform shadow-md shadow-primary/20"
                 >
-                  Book Now
+                  Book Now · €{discountedPrice(activeRec)}
                 </button>
               </motion.div>
             </div>
