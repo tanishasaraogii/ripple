@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GUESTS, getRecommendation, discountedPrice } from '../lib/data';
 import WhatsAppMessage from './WhatsAppMessage';
+import WhatsAppTicket from './WhatsAppTicket';
 import HeadoutAppOffer from './HeadoutAppOffer';
 import PaymentGateway from './PaymentGateway';
 import HeadoutVoucher from './HeadoutVoucher';
@@ -42,13 +43,12 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     setActiveMessageId(guestId);
     setPaymentOpen(false);
     setPanelClosed(false);
+    setVoucherOpen(false);
+    setChannel('whatsapp');
     if (isPaid) {
-      console.log('[MomentAfter] opening voucher for paid guest', guestId);
-      setVoucherOpen(true);
+      console.log('[MomentAfter] opening WhatsApp thread (ticket sent) for paid guest', guestId);
     } else {
       console.log('[MomentAfter] opening WhatsApp profile', guestId);
-      setVoucherOpen(false);
-      setChannel('whatsapp');
       setAppOpenedAt(null);
     }
   };
@@ -79,13 +79,15 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     setChannel('app');
   };
 
+  const activeAlreadyPaid = activeMessageId !== null && paidGuestIds.includes(activeMessageId);
+
   const handleBook = (rec: typeof activeRec) => {
-    if (!rec || offerExpired) return;
+    if (!rec || offerExpired || activeAlreadyPaid) return;
     setPaymentOpen(true);
   };
 
   const handlePaid = (rec: typeof activeRec) => {
-    if (!rec) return;
+    if (!rec || activeAlreadyPaid) return;
     const paid = discountedPrice(rec);
     if (credits < paid) return;
     setBookings(b => b + 1);
@@ -93,7 +95,8 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     setCredits(c => c - paid);
     if (activeMessageId) setPaidGuestIds(prev => prev.includes(activeMessageId) ? prev : [...prev, activeMessageId]);
     setPaymentOpen(false);
-    setVoucherOpen(true);
+    setVoucherOpen(false);
+    setChannel('whatsapp');
   };
 
   return (
@@ -141,7 +144,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                   {!isFired ? (
                     <div className="text-sm font-bold font-mono text-[#444444]">T-{mm}:{ss}</div>
                   ) : isPaid ? (
-                    <div className="text-xs font-bold text-primary">View voucher →</div>
+                    <div className="text-xs font-bold text-primary">View ticket →</div>
                   ) : (
                     <div className="text-xs font-bold text-primary">Tap to open →</div>
                   )}
@@ -208,18 +211,22 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                   <div className="mt-auto flex flex-col">
                     <WhatsAppMessage guest={activeGuest} recommendation={activeRec} onOpenLink={openApp} />
 
-                    <motion.button
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.8 }}
-                      onClick={openApp}
-                      className="self-center mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#54656f] bg-white/70 backdrop-blur px-3 py-1.5 rounded-full shadow-sm hover:bg-white"
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
-                      </svg>
-                      Tap the link → opens in the Headout app
-                    </motion.button>
+                    {paidGuestIds.includes(activeGuest.id) ? (
+                      <WhatsAppTicket guest={activeGuest} recommendation={activeRec} onOpenVoucher={() => setVoucherOpen(true)} />
+                    ) : (
+                      <motion.button
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8 }}
+                        onClick={openApp}
+                        className="self-center mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#54656f] bg-white/70 backdrop-blur px-3 py-1.5 rounded-full shadow-sm hover:bg-white"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                        Tap the link → opens in the Headout app
+                      </motion.button>
+                    )}
                   </div>
                 </div>
               </>
@@ -229,6 +236,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                 recommendation={activeRec}
                 countdownLabel={countdownLabel}
                 expired={offerExpired}
+                alreadyBooked={activeAlreadyPaid}
                 onBook={() => handleBook(activeRec)}
               />
             )}

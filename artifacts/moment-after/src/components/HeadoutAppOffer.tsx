@@ -23,12 +23,14 @@ export default function HeadoutAppOffer({
   recommendation,
   countdownLabel,
   expired,
+  alreadyBooked,
   onBook,
 }: {
   guest: Guest;
   recommendation: Recommendation;
   countdownLabel: string;
   expired: boolean;
+  alreadyBooked: boolean;
   onBook: () => void;
 }) {
   const finalPrice = discountedPrice(recommendation);
@@ -149,10 +151,10 @@ export default function HeadoutAppOffer({
         </div>
         <button
           onClick={onBook}
-          disabled={expired}
+          disabled={expired || alreadyBooked}
           className="w-full bg-primary text-white font-bold py-3.5 rounded-xl text-sm active:scale-[0.98] transition-transform shadow-md shadow-primary/20 disabled:opacity-40 disabled:active:scale-100"
         >
-          {expired ? 'Offer expired' : `Book Now · €${finalPrice}`}
+          {alreadyBooked ? '✓ Already booked' : expired ? 'Offer expired' : `Book Now · €${finalPrice}`}
         </button>
       </div>
     </div>
