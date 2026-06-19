@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GUESTS, getRecommendation, discountedPrice } from '../lib/data';
 import WhatsAppMessage from './WhatsAppMessage';
 import HeadoutAppOffer from './HeadoutAppOffer';
+import PaymentGateway from './PaymentGateway';
 import HeadoutVoucher from './HeadoutVoucher';
 
 const OFFER_VALID_MS = 40 * 60 * 1000;
+const STARTING_CREDITS = 1000;
 
 type Channel = 'whatsapp' | 'app';
 
@@ -16,6 +18,8 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [bookings, setBookings] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
   const [voucherOpen, setVoucherOpen] = useState<boolean>(false);
+  const [paymentOpen, setPaymentOpen] = useState<boolean>(false);
+  const [credits, setCredits] = useState<number>(STARTING_CREDITS);
   const [panelClosed, setPanelClosed] = useState<boolean>(false);
   const [channel, setChannel] = useState<Channel>('whatsapp');
   const [firedAt, setFiredAt] = useState<number | null>(null);
@@ -32,6 +36,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     if (triggeredGuest && activeMessageId !== triggeredGuest.id) {
       setActiveMessageId(triggeredGuest.id);
       setVoucherOpen(false);
+      setPaymentOpen(false);
       setPanelClosed(false);
       setChannel('whatsapp');
       setFiredAt(Date.now());
@@ -52,8 +57,17 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
 
   const handleBook = (rec: typeof activeRec) => {
     if (!rec || offerExpired) return;
+    setPaymentOpen(true);
+  };
+
+  const handlePaid = (rec: typeof activeRec) => {
+    if (!rec) return;
+    const paid = discountedPrice(rec);
+    if (credits < paid) return;
     setBookings(b => b + 1);
-    setRevenue(r => r + discountedPrice(rec));
+    setRevenue(r => r + paid);
+    setCredits(c => c - paid);
+    setPaymentOpen(false);
     setVoucherOpen(true);
   };
 
@@ -250,6 +264,18 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
               </motion.div>
             )}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {paymentOpen && activeGuest && activeRec && (
+          <PaymentGateway
+            guest={activeGuest}
+            recommendation={activeRec}
+            credits={credits}
+            onPaid={() => handlePaid(activeRec)}
+            onClose={() => setPaymentOpen(false)}
+          />
         )}
       </AnimatePresence>
 

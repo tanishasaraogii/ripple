@@ -104,8 +104,8 @@ export default function HeadoutVoucher({
           </svg>
         </motion.div>
         <div className="flex-1">
-          <div className="text-white font-bold text-[15px] leading-tight">Booking confirmed</div>
-          <div className="text-white/70 text-[12px] leading-tight">Same-day second booking · sent to {guest.guest_name}</div>
+          <div className="text-white font-bold text-[15px] leading-tight">Tickets issued</div>
+          <div className="text-white/70 text-[12px] leading-tight">Paid with credits · sent to {guest.guest_name}</div>
         </div>
         <button onClick={onClose} className="text-white/80 hover:text-white shrink-0" aria-label="Close voucher">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
