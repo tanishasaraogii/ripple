@@ -23,6 +23,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [panelClosed, setPanelClosed] = useState<boolean>(false);
   const [channel, setChannel] = useState<Channel>('whatsapp');
   const [appOpenedAt, setAppOpenedAt] = useState<number | null>(null);
+  const [autoFiredId, setAutoFiredId] = useState<string | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -33,7 +34,8 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
 
   useEffect(() => {
     const triggeredGuest = [...GUESTS].reverse().find(g => elapsedSeconds >= g.fire_offset_seconds);
-    if (triggeredGuest && activeMessageId !== triggeredGuest.id) {
+    if (triggeredGuest && autoFiredId !== triggeredGuest.id) {
+      setAutoFiredId(triggeredGuest.id);
       setActiveMessageId(triggeredGuest.id);
       setVoucherOpen(false);
       setPaymentOpen(false);
@@ -41,7 +43,17 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
       setChannel('whatsapp');
       setAppOpenedAt(null);
     }
-  }, [elapsedSeconds, activeMessageId]);
+  }, [elapsedSeconds, autoFiredId]);
+
+  const selectGuest = (guestId: string, isFired: boolean) => {
+    if (!isFired || activeMessageId === guestId) return;
+    setActiveMessageId(guestId);
+    setVoucherOpen(false);
+    setPaymentOpen(false);
+    setPanelClosed(false);
+    setChannel('whatsapp');
+    setAppOpenedAt(null);
+  };
 
   // The 40-min offer countdown only starts once the guest leaves WhatsApp
   // and opens the Headout app via the link / push notification.
@@ -111,14 +123,19 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
           {GUESTS.map(guest => {
             const timeUntilFire = guest.fire_offset_seconds - elapsedSeconds;
             const isFired = timeUntilFire <= 0;
-            const isFiringNow = isFired && activeMessageId === guest.id;
-            
+            const isActive = activeMessageId === guest.id && !panelClosed;
+            const isFiringNow = isFired && autoFiredId === guest.id && isActive;
+            const isViewing = isFired && isActive && !isFiringNow;
+
             let status = "UPCOMING";
             let statusColor = "text-[#6B6B76] bg-[#F7F7F8] border border-[#ECECEF]";
-            
+
             if (isFiringNow) {
               status = "FIRING NOW";
               statusColor = "text-[#E5006E] bg-[#E5006E]/10 border border-[#E5006E]/30";
+            } else if (isViewing) {
+              status = "VIEWING";
+              statusColor = "text-primary bg-primary/10 border border-primary/30";
             } else if (isFired) {
               status = "SENT";
               statusColor = "text-primary bg-primary/10 border border-primary/20";
@@ -128,7 +145,11 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             const ss = Math.max(0, timeUntilFire % 60).toString().padStart(2, '0');
 
             return (
-              <div key={guest.id} className={`p-4 rounded-xl border bg-white transition-all duration-500 ${isFiringNow ? 'shadow-md border-[#E5006E]/40 scale-[1.02]' : 'shadow-sm border-[#ECECEF]'}`}>
+              <div
+                key={guest.id}
+                onClick={() => selectGuest(guest.id, isFired)}
+                className={`p-4 rounded-xl border bg-white transition-all duration-500 ${isFiringNow ? 'shadow-md border-[#E5006E]/40 scale-[1.02]' : isViewing ? 'shadow-md border-primary/40' : 'shadow-sm border-[#ECECEF]'} ${isFired ? 'cursor-pointer hover:border-primary/40 hover:shadow-md' : ''}`}
+              >
                 <div className="flex justify-between items-start mb-2">
                   <div className="font-bold text-[15px] text-[#2A2A33]">{guest.guest_name}</div>
                   <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${statusColor} ${isFiringNow ? 'animate-pulse' : ''}`}>
