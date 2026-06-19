@@ -1,0 +1,2 @@
+- [code_execution sandbox quirks](code-execution-sandbox.md) — `AbortSignal.timeout` is undefined; plain `fetch` only, no request timeout helper.
+- [imageSearch downloads](image-search-downloads.md) — download `thumbnail.src` (Brave proxy) not `properties.url`; original source hosts block hotlinking.

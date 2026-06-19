@@ -22,7 +22,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [credits, setCredits] = useState<number>(STARTING_CREDITS);
   const [panelClosed, setPanelClosed] = useState<boolean>(false);
   const [channel, setChannel] = useState<Channel>('whatsapp');
-  const [firedAt, setFiredAt] = useState<number | null>(null);
+  const [appOpenedAt, setAppOpenedAt] = useState<number | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -39,14 +39,23 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
       setPaymentOpen(false);
       setPanelClosed(false);
       setChannel('whatsapp');
-      setFiredAt(Date.now());
+      setAppOpenedAt(null);
     }
   }, [elapsedSeconds, activeMessageId]);
+
+  // The 40-min offer countdown only starts once the guest leaves WhatsApp
+  // and opens the Headout app via the link / push notification.
+  useEffect(() => {
+    if (channel === 'app' && appOpenedAt === null) {
+      setAppOpenedAt(Date.now());
+    }
+  }, [channel, appOpenedAt]);
 
   const activeGuest = GUESTS.find(g => g.id === activeMessageId);
   const activeRec = activeGuest ? getRecommendation(activeGuest) : null;
 
-  const offerRemainingMs = firedAt !== null ? Math.max(0, firedAt + OFFER_VALID_MS - now) : OFFER_VALID_MS;
+  const offerStarted = appOpenedAt !== null;
+  const offerRemainingMs = offerStarted ? Math.max(0, appOpenedAt + OFFER_VALID_MS - now) : OFFER_VALID_MS;
   const offerExpired = offerRemainingMs <= 0;
   const countdownLabel = (() => {
     const total = Math.floor(offerRemainingMs / 1000);
@@ -54,6 +63,11 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     const ss = (total % 60).toString().padStart(2, '0');
     return `${mm}:${ss}`;
   })();
+
+  const openApp = () => {
+    setAppOpenedAt(prev => prev ?? Date.now());
+    setChannel('app');
+  };
 
   const handleBook = (rec: typeof activeRec) => {
     if (!rec || offerExpired) return;
@@ -165,7 +179,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                   WhatsApp
                 </button>
                 <button
-                  onClick={() => setChannel('app')}
+                  onClick={openApp}
                   className={`text-[12px] font-bold px-3 py-1.5 rounded-md transition-colors ${channel === 'app' ? 'bg-white text-primary shadow-sm' : 'text-[#8A8A93]'}`}
                 >
                   Headout App
@@ -190,13 +204,13 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
 
                 <div className="flex-1 min-h-0 whatsapp-bg p-4 overflow-y-auto flex flex-col">
                   <div className="mt-auto flex flex-col">
-                    <WhatsAppMessage guest={activeGuest} recommendation={activeRec} onOpenLink={() => setChannel('app')} />
+                    <WhatsAppMessage guest={activeGuest} recommendation={activeRec} onOpenLink={openApp} />
 
                     <motion.button
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.8 }}
-                      onClick={() => setChannel('app')}
+                      onClick={openApp}
                       className="self-center mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#54656f] bg-white/70 backdrop-blur px-3 py-1.5 rounded-full shadow-sm hover:bg-white"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

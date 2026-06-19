@@ -46,9 +46,17 @@ export default function HeadoutAppOffer({
             transition={{ type: 'spring', bounce: 0.35, duration: 0.6 }}
             className="bg-white/85 backdrop-blur rounded-2xl p-3 shadow-[0_6px_20px_rgba(0,0,0,0.12)] border border-black/[0.04]"
           >
-            <div className="flex items-center gap-2.5 mb-1.5">
+            <div className="flex items-center gap-2 mb-1.5">
               <HeadoutIcon size={22} />
-              <span className="text-[12px] font-semibold text-[#3A3A44] uppercase tracking-wide">Headout</span>
+              <img
+                src="https://cdn-imgix-open.headout.com/logo/svg/Headout_purps.svg"
+                alt="Headout"
+                className="h-3.5"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  e.currentTarget.insertAdjacentHTML('afterend', '<span class="text-[12px] font-bold text-primary lowercase">headout</span>');
+                }}
+              />
               <span className="text-[12px] text-[#9A9AA3] ml-auto">now</span>
             </div>
             <div className="text-[14px] font-bold text-[#1A1A22] leading-snug">
@@ -70,19 +78,29 @@ export default function HeadoutAppOffer({
         >
           {/* Hero */}
           <div
-            className="relative h-24 flex items-end p-4"
+            className="relative h-32 flex items-end p-4 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #8000FF 0%, #E5006E 100%)' }}
           >
+            <img
+              src={recommendation.image_url}
+              alt={recommendation.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(180deg, rgba(20,0,40,0.05) 0%, rgba(20,0,40,0.78) 100%)' }}
+            />
             {hasDiscount && (
               <div className="absolute top-3 right-3 bg-white text-[#E5006E] text-[11px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm">
                 {recommendation.discount_pct}% off
               </div>
             )}
-            <div>
-              <div className="text-white/80 text-[11px] font-bold uppercase tracking-widest mb-1">
+            <div className="relative">
+              <div className="text-white/90 text-[11px] font-bold uppercase tracking-widest mb-1 drop-shadow">
                 {recommendation.category} · {guest.city}
               </div>
-              <div className="text-white font-extrabold text-[18px] leading-tight">{recommendation.name}</div>
+              <div className="text-white font-extrabold text-[18px] leading-tight drop-shadow">{recommendation.name}</div>
             </div>
           </div>
 
@@ -91,6 +109,18 @@ export default function HeadoutAppOffer({
               {recommendation.distance_minutes} min away · {recommendation.available_slots} slots left today
             </div>
             <p className="text-[13px] text-[#4A4A55] leading-relaxed mb-3">{recommendation.highlight_line}</p>
+
+            <a
+              href={recommendation.headout_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary hover:underline mb-3"
+            >
+              Know more on headout.com
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
 
             {/* Countdown */}
             <div
