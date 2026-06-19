@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GUESTS, getRecommendation, Guest, Recommendation } from '../lib/data';
+import { GUESTS, getRecommendation } from '../lib/data';
 import WhatsAppMessage from './WhatsAppMessage';
+import HeadoutVoucher from './HeadoutVoucher';
 
 export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [startTime] = useState(Date.now());
@@ -9,6 +10,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [bookings, setBookings] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
+  const [voucherOpen, setVoucherOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -21,6 +23,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     const triggeredGuest = [...GUESTS].reverse().find(g => elapsedSeconds >= g.fire_offset_seconds);
     if (triggeredGuest && activeMessageId !== triggeredGuest.id) {
       setActiveMessageId(triggeredGuest.id);
+      setVoucherOpen(false);
     }
   }, [elapsedSeconds, activeMessageId]);
 
@@ -130,6 +133,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                   onClick={() => {
                     setBookings(b => b + 1);
                     setRevenue(r => r + activeRec.price);
+                    setVoucherOpen(true);
                   }}
                   className="w-full bg-primary text-white font-bold py-3 rounded-lg text-sm active:scale-[0.98] transition-transform shadow-md shadow-primary/20"
                 >
@@ -159,6 +163,18 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
               </motion.div>
             )}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {voucherOpen && activeGuest && activeRec && (
+          <HeadoutVoucher
+            guest={activeGuest}
+            recommendation={activeRec}
+            bookings={bookings}
+            revenue={revenue}
+            onClose={() => setVoucherOpen(false)}
+          />
         )}
       </AnimatePresence>
     </div>
