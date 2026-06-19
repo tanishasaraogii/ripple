@@ -23,10 +23,14 @@ export default function ScreenLanding({ onNext }: { onNext: () => void }) {
           }}
         />
         
-        <h1 className="text-[40px] leading-[1.1] font-extrabold tracking-tight mb-5 text-[#2A2A33]">
-          The Moment After
+        <h1 className="text-[40px] leading-[1.1] font-extrabold tracking-tight mb-3 text-[#2A2A33]">
+          Ripple
         </h1>
-        
+
+        <p className="text-lg font-semibold text-primary mb-5 max-w-sm">
+          One great experience ripples into the next.
+        </p>
+
         <p className="text-muted-foreground text-lg leading-relaxed mb-12 max-w-sm">
           Headout's highest-intent customer is someone who just finished an experience. We've been sending them nothing. Until now.
         </p>

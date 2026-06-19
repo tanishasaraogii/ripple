@@ -1,6 +1,6 @@
-# The Moment After
+# Ripple
 
-A live-ops demo for Headout that fires a perfectly-timed, personalized WhatsApp message the moment a guest finishes an experience, recommending the ideal next bookable experience nearby — a same-day-second-booking, zero-CAC revenue recovery play.
+One great experience ripples into the next. A live-ops demo for Headout that fires a perfectly-timed, personalized WhatsApp message the moment a guest finishes an experience, recommending the ideal next bookable experience nearby — a same-day-second-booking, zero-CAC revenue recovery play.
 
 ## Run & Operate
 

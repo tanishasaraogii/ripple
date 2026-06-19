@@ -35,9 +35,9 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
 
   const selectGuest = (guestId: string, isFired: boolean) => {
     const isPaid = paidGuestIds.includes(guestId);
-    console.log('[MomentAfter] guest card clicked', { guestId, isFired, isPaid, activeMessageId, panelClosed, voucherOpen, paymentOpen });
+    console.log('[Ripple] guest card clicked', { guestId, isFired, isPaid, activeMessageId, panelClosed, voucherOpen, paymentOpen });
     if (!isFired) {
-      console.log('[MomentAfter] ignored — guest has not fired yet');
+      console.log('[Ripple] ignored — guest has not fired yet');
       return;
     }
     setActiveMessageId(guestId);
@@ -46,9 +46,9 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     setVoucherOpen(false);
     setChannel('whatsapp');
     if (isPaid) {
-      console.log('[MomentAfter] opening WhatsApp thread (ticket sent) for paid guest', guestId);
+      console.log('[Ripple] opening WhatsApp thread (ticket sent) for paid guest', guestId);
     } else {
-      console.log('[MomentAfter] opening WhatsApp profile', guestId);
+      console.log('[Ripple] opening WhatsApp profile', guestId);
       setAppOpenedAt(null);
     }
   };
@@ -284,7 +284,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             recommendation={activeRec}
             bookings={bookings}
             revenue={revenue}
-            onClose={() => { console.log('[MomentAfter] voucher closed → back to console'); setVoucherOpen(false); setPanelClosed(true); }}
+            onClose={() => { console.log('[Ripple] voucher closed → back to console'); setVoucherOpen(false); setPanelClosed(true); }}
           />
         )}
       </AnimatePresence>
