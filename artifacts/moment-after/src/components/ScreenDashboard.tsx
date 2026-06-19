@@ -23,7 +23,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [panelClosed, setPanelClosed] = useState<boolean>(false);
   const [channel, setChannel] = useState<Channel>('whatsapp');
   const [appOpenedAt, setAppOpenedAt] = useState<number | null>(null);
-  const [autoFiredId, setAutoFiredId] = useState<string | null>(null);
+  const [paidGuestIds, setPaidGuestIds] = useState<string[]>([]);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -32,36 +32,25 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
 
   const elapsedSeconds = Math.floor((now - startTime) / 1000);
 
-  useEffect(() => {
-    const triggeredGuest = [...GUESTS].reverse().find(g => elapsedSeconds >= g.fire_offset_seconds);
-    if (triggeredGuest && autoFiredId !== triggeredGuest.id) {
-      setAutoFiredId(triggeredGuest.id);
-      setActiveMessageId(triggeredGuest.id);
-      setVoucherOpen(false);
-      setPaymentOpen(false);
-      setPanelClosed(false);
-      setChannel('whatsapp');
-      setAppOpenedAt(null);
-    }
-  }, [elapsedSeconds, autoFiredId]);
-
   const selectGuest = (guestId: string, isFired: boolean) => {
-    console.log('[MomentAfter] guest card clicked', { guestId, isFired, activeMessageId, panelClosed, voucherOpen, paymentOpen });
+    const isPaid = paidGuestIds.includes(guestId);
+    console.log('[MomentAfter] guest card clicked', { guestId, isFired, isPaid, activeMessageId, panelClosed, voucherOpen, paymentOpen });
     if (!isFired) {
       console.log('[MomentAfter] ignored — guest has not fired yet');
       return;
     }
-    if (activeMessageId === guestId && !panelClosed) {
-      console.log('[MomentAfter] ignored — already viewing this guest');
-      return;
-    }
-    console.log('[MomentAfter] opening guest profile', guestId);
     setActiveMessageId(guestId);
-    setVoucherOpen(false);
     setPaymentOpen(false);
     setPanelClosed(false);
-    setChannel('whatsapp');
-    setAppOpenedAt(null);
+    if (isPaid) {
+      console.log('[MomentAfter] opening voucher for paid guest', guestId);
+      setVoucherOpen(true);
+    } else {
+      console.log('[MomentAfter] opening WhatsApp profile', guestId);
+      setVoucherOpen(false);
+      setChannel('whatsapp');
+      setAppOpenedAt(null);
+    }
   };
 
   // The 40-min offer countdown only starts once the guest leaves WhatsApp
@@ -102,6 +91,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
     setBookings(b => b + 1);
     setRevenue(r => r + paid);
     setCredits(c => c - paid);
+    if (activeMessageId) setPaidGuestIds(prev => prev.includes(activeMessageId) ? prev : [...prev, activeMessageId]);
     setPaymentOpen(false);
     setVoucherOpen(true);
   };
@@ -133,22 +123,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             const timeUntilFire = guest.fire_offset_seconds - elapsedSeconds;
             const isFired = timeUntilFire <= 0;
             const isActive = activeMessageId === guest.id && !panelClosed;
-            const isFiringNow = isFired && autoFiredId === guest.id && isActive;
-            const isViewing = isFired && isActive && !isFiringNow;
-
-            let status = "UPCOMING";
-            let statusColor = "text-[#6B6B76] bg-[#F7F7F8] border border-[#ECECEF]";
-
-            if (isFiringNow) {
-              status = "FIRING NOW";
-              statusColor = "text-[#E5006E] bg-[#E5006E]/10 border border-[#E5006E]/30";
-            } else if (isViewing) {
-              status = "VIEWING";
-              statusColor = "text-primary bg-primary/10 border border-primary/30";
-            } else if (isFired) {
-              status = "SENT";
-              statusColor = "text-primary bg-primary/10 border border-primary/20";
-            }
+            const isPaid = paidGuestIds.includes(guest.id);
 
             const mm = Math.max(0, Math.floor(timeUntilFire / 60)).toString().padStart(2, '0');
             const ss = Math.max(0, timeUntilFire % 60).toString().padStart(2, '0');
@@ -157,21 +132,18 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
               <div
                 key={guest.id}
                 onClick={() => selectGuest(guest.id, isFired)}
-                className={`p-4 rounded-xl border bg-white transition-all duration-500 ${isFiringNow ? 'shadow-md border-[#E5006E]/40 scale-[1.02]' : isViewing ? 'shadow-md border-primary/40' : 'shadow-sm border-[#ECECEF]'} ${isFired ? 'cursor-pointer hover:border-primary/40 hover:shadow-md' : ''}`}
+                className={`p-4 rounded-xl border bg-white transition-all duration-500 ${isActive ? 'shadow-md border-primary/40' : 'shadow-sm border-[#ECECEF]'} ${isFired ? 'cursor-pointer hover:border-primary/40 hover:shadow-md' : 'opacity-60'}`}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="font-bold text-[15px] text-[#2A2A33]">{guest.guest_name}</div>
-                  <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${statusColor} ${isFiringNow ? 'animate-pulse' : ''}`}>
-                    {status}
-                  </div>
-                </div>
+                <div className="font-bold text-[15px] text-[#2A2A33] mb-1">{guest.guest_name}</div>
                 <div className="text-sm text-[#6B6B76] mb-3 truncate font-medium">{guest.experience_name}</div>
                 <div className="flex justify-between items-end">
                   <div className="text-xs text-[#8A8A93]">{guest.city} · Ends {guest.end_time}</div>
                   {!isFired ? (
                     <div className="text-sm font-bold font-mono text-[#444444]">T-{mm}:{ss}</div>
+                  ) : isPaid ? (
+                    <div className="text-xs font-bold text-primary">View voucher →</div>
                   ) : (
-                    <div className="text-sm font-bold font-mono text-primary">Delivered</div>
+                    <div className="text-xs font-bold text-primary">Tap to open →</div>
                   )}
                 </div>
               </div>
