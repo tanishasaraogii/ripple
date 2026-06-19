@@ -46,7 +46,16 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   }, [elapsedSeconds, autoFiredId]);
 
   const selectGuest = (guestId: string, isFired: boolean) => {
-    if (!isFired || activeMessageId === guestId) return;
+    console.log('[MomentAfter] guest card clicked', { guestId, isFired, activeMessageId, panelClosed, voucherOpen, paymentOpen });
+    if (!isFired) {
+      console.log('[MomentAfter] ignored — guest has not fired yet');
+      return;
+    }
+    if (activeMessageId === guestId && !panelClosed) {
+      console.log('[MomentAfter] ignored — already viewing this guest');
+      return;
+    }
+    console.log('[MomentAfter] opening guest profile', guestId);
     setActiveMessageId(guestId);
     setVoucherOpen(false);
     setPaymentOpen(false);
@@ -295,7 +304,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             recommendation={activeRec}
             bookings={bookings}
             revenue={revenue}
-            onClose={() => setVoucherOpen(false)}
+            onClose={() => { console.log('[MomentAfter] voucher closed → back to console'); setVoucherOpen(false); setPanelClosed(true); }}
           />
         )}
       </AnimatePresence>
