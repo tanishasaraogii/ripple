@@ -188,7 +188,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                   </div>
                 </div>
 
-                <div className="flex-1 whatsapp-bg p-4 overflow-y-auto flex flex-col justify-end">
+                <div className="flex-1 min-h-0 whatsapp-bg p-4 overflow-y-auto flex flex-col justify-end">
                   <WhatsAppMessage guest={activeGuest} recommendation={activeRec} onOpenLink={() => setChannel('app')} />
 
                   <motion.button

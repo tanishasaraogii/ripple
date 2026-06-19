@@ -35,7 +35,7 @@ export default function HeadoutAppOffer({
   const hasDiscount = recommendation.discount_pct > 0 && finalPrice < recommendation.price;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[#F2F2F7] flex flex-col">
+    <div className="flex-1 min-h-0 overflow-y-auto bg-[#F2F2F7] flex flex-col">
       {/* Push notification */}
       <div className="px-3 pt-3">
         <motion.div
