@@ -17,9 +17,7 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
 
   const elapsedSeconds = Math.floor((now - startTime) / 1000);
 
-  // Auto-trigger logic
   useEffect(() => {
-    // Find the latest guest whose fire_offset_seconds has passed
     const triggeredGuest = [...GUESTS].reverse().find(g => elapsedSeconds >= g.fire_offset_seconds);
     if (triggeredGuest && activeMessageId !== triggeredGuest.id) {
       setActiveMessageId(triggeredGuest.id);
@@ -30,10 +28,22 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const activeRec = activeGuest ? getRecommendation(activeGuest) : null;
 
   return (
-    <div className="flex flex-col h-full relative">
-      <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#0a0a0a] z-20">
-        <h2 className="font-semibold text-lg">Live Console</h2>
-        <button onClick={onNext} className="text-xs text-primary font-medium tracking-wider uppercase bg-[#1a1a1a] px-3 py-1.5 rounded-full">
+    <div className="flex flex-col h-full relative bg-[#F7F7F8]">
+      <div className="px-5 py-4 border-b border-[#ECECEF] flex justify-between items-center bg-white z-20 shadow-sm">
+        <div className="flex items-center gap-3">
+          <img 
+            src="https://cdn-imgix-open.headout.com/logo/svg/Headout_purps.svg" 
+            alt="headout"
+            className="h-5"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+              e.currentTarget.parentElement?.insertAdjacentHTML('afterbegin', '<span class="text-primary font-bold text-lg leading-none">headout</span>');
+            }}
+          />
+          <div className="w-px h-4 bg-[#ECECEF]"></div>
+          <h2 className="font-semibold text-sm text-[#6B6B76]">Live Console</h2>
+        </div>
+        <button onClick={onNext} className="text-xs text-primary font-bold tracking-wide uppercase px-3 py-1.5 rounded-full hover:bg-primary/5 transition-colors">
           Summary →
         </button>
       </div>
@@ -46,33 +56,34 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             const isFiringNow = isFired && activeMessageId === guest.id;
             
             let status = "UPCOMING";
-            let statusColor = "text-yellow-500 bg-yellow-500/10";
+            let statusColor = "text-[#6B6B76] bg-[#F7F7F8] border border-[#ECECEF]";
+            
             if (isFiringNow) {
               status = "FIRING NOW";
-              statusColor = "text-primary bg-primary/10 border border-primary/30";
+              statusColor = "text-[#E5006E] bg-[#E5006E]/10 border border-[#E5006E]/30";
             } else if (isFired) {
               status = "SENT";
-              statusColor = "text-green-500 bg-green-500/10";
+              statusColor = "text-primary bg-primary/10 border border-primary/20";
             }
 
             const mm = Math.max(0, Math.floor(timeUntilFire / 60)).toString().padStart(2, '0');
             const ss = Math.max(0, timeUntilFire % 60).toString().padStart(2, '0');
 
             return (
-              <div key={guest.id} className={`p-4 rounded-xl border ${isFiringNow ? 'border-primary/50 shadow-[0_0_15px_rgba(37,211,102,0.15)] bg-[#111]' : 'border-[#222] bg-[#0f0f0f]'} transition-all duration-500`}>
+              <div key={guest.id} className={`p-4 rounded-xl border bg-white transition-all duration-500 ${isFiringNow ? 'shadow-md border-[#E5006E]/40 scale-[1.02]' : 'shadow-sm border-[#ECECEF]'}`}>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="font-medium text-[15px]">{guest.guest_name}</div>
-                  <div className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${statusColor} ${isFiringNow ? 'animate-pulse' : ''}`}>
+                  <div className="font-bold text-[15px] text-[#2A2A33]">{guest.guest_name}</div>
+                  <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${statusColor} ${isFiringNow ? 'animate-pulse' : ''}`}>
                     {status}
                   </div>
                 </div>
-                <div className="text-sm text-gray-400 mb-3 truncate">{guest.experience_name}</div>
+                <div className="text-sm text-[#6B6B76] mb-3 truncate font-medium">{guest.experience_name}</div>
                 <div className="flex justify-between items-end">
-                  <div className="text-xs text-gray-500">{guest.city} · Ends {guest.end_time}</div>
+                  <div className="text-xs text-[#8A8A93]">{guest.city} · Ends {guest.end_time}</div>
                   {!isFired ? (
-                    <div className="text-sm font-mono text-gray-300">T-{mm}:{ss}</div>
+                    <div className="text-sm font-bold font-mono text-[#444444]">T-{mm}:{ss}</div>
                   ) : (
-                    <div className="text-sm font-mono text-primary">Delivered</div>
+                    <div className="text-sm font-bold font-mono text-primary">Delivered</div>
                   )}
                 </div>
               </div>
@@ -89,15 +100,18 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-            className="absolute bottom-0 left-0 w-full h-[460px] bg-[#0b141a] border-t border-[#222] flex flex-col z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] rounded-t-2xl overflow-hidden"
+            className="absolute bottom-0 left-0 w-full h-[460px] bg-white border-t border-[#ECECEF] flex flex-col z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-2xl overflow-hidden"
           >
-            <div className="bg-[#202c33] px-4 py-3 flex items-center gap-3 shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center font-semibold text-lg text-white">
-                {activeGuest.guest_name[0]}
+            {/* Authentic WhatsApp Header */}
+            <div className="bg-[#F0F2F5] px-4 py-3 flex items-center gap-3 shrink-0 border-b border-[#D1D7DB]">
+              <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center overflow-hidden shrink-0">
+                <svg viewBox="0 0 24 24" width="24" height="24" className="text-[#a6b0b5]" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path>
+                </svg>
               </div>
-              <div>
-                <div className="font-semibold text-[16px] text-[#e9edef]">{activeGuest.guest_name}</div>
-                <div className="text-xs text-[#8696a0]">online</div>
+              <div className="flex-1">
+                <div className="font-medium text-[16px] text-[#111B21] leading-tight">{activeGuest.guest_name}</div>
+                <div className="text-[13px] text-[#667781] leading-tight mt-0.5">online</div>
               </div>
             </div>
             
@@ -108,16 +122,16 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
-                className="mt-6 bg-[#111] p-4 rounded-xl border border-[#222] mx-2 shadow-lg"
+                className="mt-4 bg-white p-4 rounded-xl border border-[#ECECEF] shadow-sm"
               >
-                <div className="text-sm font-semibold mb-1">{activeRec.name}</div>
-                <div className="text-xs text-gray-400 mb-3">{activeRec.distance_minutes} min away · {activeRec.available_slots} slots left</div>
+                <div className="text-sm font-bold text-[#2A2A33] mb-1">{activeRec.name}</div>
+                <div className="text-xs text-[#6B6B76] mb-4 font-medium">{activeRec.distance_minutes} min away · {activeRec.available_slots} slots left</div>
                 <button 
                   onClick={() => {
                     setBookings(b => b + 1);
                     setRevenue(r => r + activeRec.price);
                   }}
-                  className="w-full bg-primary text-black font-semibold py-2.5 rounded-lg text-sm active:scale-[0.98] transition-transform"
+                  className="w-full bg-primary text-white font-bold py-3 rounded-lg text-sm active:scale-[0.98] transition-transform shadow-md shadow-primary/20"
                 >
                   Book Now
                 </button>
@@ -128,19 +142,19 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
               <motion.div 
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
-                className="bg-[#111] border-t border-primary/30 p-4 shrink-0"
+                className="bg-white border-t border-primary/20 p-5 shrink-0 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]"
               >
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-400">Same-day second bookings:</span>
-                  <span className="text-sm font-bold text-white">{bookings}</span>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-[#6B6B76]">Same-day second bookings:</span>
+                  <span className="text-sm font-bold text-[#2A2A33]">{bookings}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Revenue recovered:</span>
-                  <span className="text-sm font-bold text-white">€{revenue}</span>
+                  <span className="text-sm font-medium text-[#6B6B76]">Revenue recovered:</span>
+                  <span className="text-sm font-bold text-[#2A2A33]">€{revenue}</span>
                 </div>
-                <div className="mt-3 pt-3 border-t border-[#222] flex justify-between items-center">
-                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">CAC</span>
-                  <span className="text-2xl font-black text-primary">€0</span>
+                <div className="mt-4 pt-4 border-t border-[#ECECEF] flex justify-between items-center">
+                  <span className="text-xs font-bold text-primary uppercase tracking-widest">CAC</span>
+                  <span className="text-3xl font-extrabold text-primary tracking-tight">€0</span>
                 </div>
               </motion.div>
             )}

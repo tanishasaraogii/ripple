@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ScreenLanding from './components/ScreenLanding';
 import ScreenDashboard from './components/ScreenDashboard';
 import ScreenSummary from './components/ScreenSummary';
@@ -9,7 +9,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('landing');
 
   return (
-    <div className="w-full h-full text-white flex flex-col relative bg-[#0a0a0a]">
+    <div className="w-full h-full text-[#2A2A33] flex flex-col relative bg-white">
       {currentScreen === 'landing' && <ScreenLanding onNext={() => setCurrentScreen('dashboard')} />}
       {currentScreen === 'dashboard' && <ScreenDashboard onNext={() => setCurrentScreen('summary')} />}
       {currentScreen === 'summary' && <ScreenSummary onRestart={() => setCurrentScreen('landing')} />}
