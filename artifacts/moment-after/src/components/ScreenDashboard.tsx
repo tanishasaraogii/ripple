@@ -188,21 +188,23 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                   </div>
                 </div>
 
-                <div className="flex-1 min-h-0 whatsapp-bg p-4 overflow-y-auto flex flex-col justify-end">
-                  <WhatsAppMessage guest={activeGuest} recommendation={activeRec} onOpenLink={() => setChannel('app')} />
+                <div className="flex-1 min-h-0 whatsapp-bg p-4 overflow-y-auto flex flex-col">
+                  <div className="mt-auto flex flex-col">
+                    <WhatsAppMessage guest={activeGuest} recommendation={activeRec} onOpenLink={() => setChannel('app')} />
 
-                  <motion.button
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 }}
-                    onClick={() => setChannel('app')}
-                    className="self-center mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#54656f] bg-white/70 backdrop-blur px-3 py-1.5 rounded-full shadow-sm hover:bg-white"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
-                    Tap the link → opens in the Headout app
-                  </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.8 }}
+                      onClick={() => setChannel('app')}
+                      className="self-center mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#54656f] bg-white/70 backdrop-blur px-3 py-1.5 rounded-full shadow-sm hover:bg-white"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                      Tap the link → opens in the Headout app
+                    </motion.button>
+                  </div>
                 </div>
               </>
             ) : (
