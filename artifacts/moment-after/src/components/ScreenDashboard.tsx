@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GUESTS, getRecommendation, discountedPrice } from '../lib/data';
 import WhatsAppMessage from './WhatsAppMessage';
+import HeadoutAppOffer from './HeadoutAppOffer';
 import HeadoutVoucher from './HeadoutVoucher';
+
+const OFFER_VALID_MS = 40 * 60 * 1000;
+
+type Channel = 'whatsapp' | 'app';
 
 export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [startTime] = useState(Date.now());
@@ -12,6 +17,8 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
   const [revenue, setRevenue] = useState<number>(0);
   const [voucherOpen, setVoucherOpen] = useState<boolean>(false);
   const [panelClosed, setPanelClosed] = useState<boolean>(false);
+  const [channel, setChannel] = useState<Channel>('whatsapp');
+  const [firedAt, setFiredAt] = useState<number | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -26,11 +33,29 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
       setActiveMessageId(triggeredGuest.id);
       setVoucherOpen(false);
       setPanelClosed(false);
+      setChannel('whatsapp');
+      setFiredAt(Date.now());
     }
   }, [elapsedSeconds, activeMessageId]);
 
   const activeGuest = GUESTS.find(g => g.id === activeMessageId);
   const activeRec = activeGuest ? getRecommendation(activeGuest) : null;
+
+  const offerRemainingMs = firedAt !== null ? Math.max(0, firedAt + OFFER_VALID_MS - now) : OFFER_VALID_MS;
+  const offerExpired = offerRemainingMs <= 0;
+  const countdownLabel = (() => {
+    const total = Math.floor(offerRemainingMs / 1000);
+    const mm = Math.floor(total / 60).toString().padStart(2, '0');
+    const ss = (total % 60).toString().padStart(2, '0');
+    return `${mm}:${ss}`;
+  })();
+
+  const handleBook = (rec: typeof activeRec) => {
+    if (!rec || offerExpired) return;
+    setBookings(b => b + 1);
+    setRevenue(r => r + discountedPrice(rec));
+    setVoucherOpen(true);
+  };
 
   return (
     <div className="flex flex-col h-full relative bg-[#F7F7F8]">
@@ -107,67 +132,102 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
             transition={{ type: "spring", bounce: 0, duration: 0.5 }}
             className="absolute bottom-0 left-0 w-full h-[460px] bg-white border-t border-[#ECECEF] flex flex-col z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-2xl overflow-hidden"
           >
-            {/* Authentic WhatsApp Header */}
-            <div className="bg-[#F0F2F5] px-4 py-3 flex items-center gap-3 shrink-0 border-b border-[#D1D7DB]">
+            {/* Shared top bar: back + channel switch */}
+            <div className="bg-white px-3 py-2.5 flex items-center gap-2 shrink-0 border-b border-[#ECECEF]">
               <button
                 onClick={() => { setVoucherOpen(false); setPanelClosed(true); }}
-                className="text-[#54656f] hover:text-[#111B21] shrink-0 -ml-1"
+                className="text-[#54656f] hover:text-[#111B21] shrink-0"
                 aria-label="Back to live console"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center overflow-hidden shrink-0">
-                <svg viewBox="0 0 24 24" width="24" height="24" className="text-[#a6b0b5]" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path>
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-[16px] text-[#111B21] leading-tight">{activeGuest.guest_name}</div>
-                <div className="text-[13px] text-[#667781] leading-tight mt-0.5">online</div>
-              </div>
-            </div>
-            
-            <div className="flex-1 whatsapp-bg p-4 overflow-y-auto flex flex-col justify-end">
-              <WhatsAppMessage guest={activeGuest} recommendation={activeRec} />
-              
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="mt-4 bg-white p-4 rounded-xl border border-[#ECECEF] shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <div className="text-sm font-bold text-[#2A2A33]">{activeRec.name}</div>
-                  {activeRec.discount_pct > 0 && (
-                    <span className="shrink-0 text-[10px] font-bold text-[#E5006E] bg-[#E5006E]/10 border border-[#E5006E]/30 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                      {activeRec.discount_pct}% off
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-[#6B6B76] mb-3 font-medium">{activeRec.distance_minutes} min away · {activeRec.available_slots} slots left</div>
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-lg font-extrabold text-[#2A2A33]">€{discountedPrice(activeRec)}</span>
-                  {activeRec.discount_pct > 0 && (
-                    <span className="text-sm text-[#9A9AA3] line-through">€{activeRec.price}</span>
-                  )}
-                  {activeRec.discount_pct > 0 && (
-                    <span className="text-xs text-[#E5006E] font-semibold">post-experience perk</span>
-                  )}
-                </div>
-                <button 
-                  onClick={() => {
-                    setBookings(b => b + 1);
-                    setRevenue(r => r + discountedPrice(activeRec));
-                    setVoucherOpen(true);
-                  }}
-                  className="w-full bg-primary text-white font-bold py-3 rounded-lg text-sm active:scale-[0.98] transition-transform shadow-md shadow-primary/20"
+              <div className="flex items-center gap-1 ml-auto bg-[#F2F2F5] p-0.5 rounded-lg">
+                <button
+                  onClick={() => setChannel('whatsapp')}
+                  className={`text-[12px] font-bold px-3 py-1.5 rounded-md transition-colors ${channel === 'whatsapp' ? 'bg-white text-[#1A1A22] shadow-sm' : 'text-[#8A8A93]'}`}
                 >
-                  Book Now · €{discountedPrice(activeRec)}
+                  WhatsApp
                 </button>
-              </motion.div>
+                <button
+                  onClick={() => setChannel('app')}
+                  className={`text-[12px] font-bold px-3 py-1.5 rounded-md transition-colors ${channel === 'app' ? 'bg-white text-primary shadow-sm' : 'text-[#8A8A93]'}`}
+                >
+                  Headout App
+                </button>
+              </div>
             </div>
+
+            {channel === 'whatsapp' ? (
+              <>
+                {/* Authentic WhatsApp Header */}
+                <div className="bg-[#F0F2F5] px-4 py-3 flex items-center gap-3 shrink-0 border-b border-[#D1D7DB]">
+                  <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center overflow-hidden shrink-0">
+                    <svg viewBox="0 0 24 24" width="24" height="24" className="text-[#a6b0b5]" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-[16px] text-[#111B21] leading-tight">{activeGuest.guest_name}</div>
+                    <div className="text-[13px] text-[#667781] leading-tight mt-0.5">online</div>
+                  </div>
+                </div>
+
+                <div className="flex-1 whatsapp-bg p-4 overflow-y-auto flex flex-col justify-end">
+                  <WhatsAppMessage guest={activeGuest} recommendation={activeRec} countdownLabel={countdownLabel} expired={offerExpired} />
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                    className="mt-4 bg-white p-4 rounded-xl border border-[#ECECEF] shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="text-sm font-bold text-[#2A2A33]">{activeRec.name}</div>
+                      {activeRec.discount_pct > 0 && (
+                        <span className="shrink-0 text-[10px] font-bold text-[#E5006E] bg-[#E5006E]/10 border border-[#E5006E]/30 px-2 py-0.5 rounded-md uppercase tracking-wide">
+                          {activeRec.discount_pct}% off
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-[#6B6B76] mb-3 font-medium">{activeRec.distance_minutes} min away · {activeRec.available_slots} slots left</div>
+                    <div
+                      className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 mb-3 text-[12px] font-semibold ${offerExpired ? 'bg-[#F7F7F8] text-[#9A9AA3] border border-[#ECECEF]' : 'bg-[#E5006E]/10 text-[#E5006E] border border-[#E5006E]/25'}`}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" />
+                      </svg>
+                      {offerExpired ? 'This offer has expired' : `Offer expires in ${countdownLabel}`}
+                    </div>
+                    <div className="flex items-baseline gap-2 mb-4">
+                      <span className="text-lg font-extrabold text-[#2A2A33]">€{discountedPrice(activeRec)}</span>
+                      {activeRec.discount_pct > 0 && (
+                        <span className="text-sm text-[#9A9AA3] line-through">€{activeRec.price}</span>
+                      )}
+                      {activeRec.discount_pct > 0 && (
+                        <span className="text-xs text-[#E5006E] font-semibold">post-experience perk</span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleBook(activeRec)}
+                      disabled={offerExpired}
+                      className="w-full bg-primary text-white font-bold py-3 rounded-lg text-sm active:scale-[0.98] transition-transform shadow-md shadow-primary/20 disabled:opacity-40 disabled:active:scale-100"
+                    >
+                      {offerExpired ? 'Offer expired' : `Book Now · €${discountedPrice(activeRec)}`}
+                    </button>
+                  </motion.div>
+                </div>
+              </>
+            ) : (
+              <HeadoutAppOffer
+                guest={activeGuest}
+                recommendation={activeRec}
+                countdownLabel={countdownLabel}
+                expired={offerExpired}
+                onBook={() => handleBook(activeRec)}
+              />
+            )}
 
             {bookings > 0 && (
               <motion.div 

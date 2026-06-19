@@ -1,7 +1,7 @@
 import { Guest, Recommendation, discountedPrice } from '../lib/data';
 import { motion } from 'framer-motion';
 
-export default function WhatsAppMessage({ guest, recommendation }: { guest: Guest, recommendation: Recommendation }) {
+export default function WhatsAppMessage({ guest, recommendation, countdownLabel, expired }: { guest: Guest, recommendation: Recommendation, countdownLabel: string, expired: boolean }) {
   const finalPrice = discountedPrice(recommendation);
   const hasDiscount = recommendation.discount_pct > 0 && finalPrice < recommendation.price;
   const priceLine = finalPrice === 0
@@ -26,6 +26,9 @@ export default function WhatsAppMessage({ guest, recommendation }: { guest: Gues
         {guest.guest_name}! Your {guest.experience_name} just wrapped 🎉{'\n\n'}
         {recommendation.name} is {recommendation.distance_minutes} min away and has {recommendation.available_slots} slots left today.{'\n\n'}
         {recommendation.highlight_line}{'\n\n'}
+        {expired
+          ? '⌛ This offer has expired.'
+          : `⏳ Offer expires in ${countdownLabel} — book before you leave the area.`}{'\n\n'}
         {priceLine}{'\n'}
         <span className="text-[#027eb5] hover:underline cursor-pointer">headout.com/book/{recommendation.id}</span>
       </div>
