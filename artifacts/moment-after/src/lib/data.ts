@@ -36,9 +36,9 @@ export function discountedPrice(rec: Recommendation): number {
 
 export const GUESTS: Guest[] = [
   { id: '1', guest_name: 'Sarah', city: 'Paris', experience_name: 'Eiffel Tower Skip-the-Line', experience_category: 'landmark', end_time: '3:00pm', price_tier: 'luxury', solo_or_group: 'group', fire_offset_seconds: 8 },
-  { id: '2', guest_name: 'James', city: 'Tokyo', experience_name: 'Tokyo Street Food Tour', experience_category: 'food', end_time: '2:30pm', price_tier: 'mid', solo_or_group: 'solo', fire_offset_seconds: 53 },
-  { id: '3', guest_name: 'Priya', city: 'Rome', experience_name: 'Colosseum Underground Tour', experience_category: 'museum', end_time: '4:00pm', price_tier: 'mid', solo_or_group: 'group', fire_offset_seconds: 98 },
-  { id: '4', guest_name: 'Marco', city: 'Barcelona', experience_name: 'Barcelona Sagrada Familia Tour', experience_category: 'landmark', end_time: '1:45pm', price_tier: 'budget', solo_or_group: 'solo', fire_offset_seconds: 143 },
+  { id: '2', guest_name: 'James', city: 'Tokyo', experience_name: 'Tokyo Street Food Tour', experience_category: 'food', end_time: '2:30pm', price_tier: 'mid', solo_or_group: 'solo', fire_offset_seconds: 18 },
+  { id: '3', guest_name: 'Priya', city: 'Rome', experience_name: 'Colosseum Underground Tour', experience_category: 'museum', end_time: '4:00pm', price_tier: 'mid', solo_or_group: 'group', fire_offset_seconds: 28 },
+  { id: '4', guest_name: 'Marco', city: 'Barcelona', experience_name: 'Barcelona Sagrada Familia Tour', experience_category: 'landmark', end_time: '1:45pm', price_tier: 'budget', solo_or_group: 'solo', fire_offset_seconds: 38 },
 ];
 
 export const CATALOGUE: Record<string, Recommendation[]> = {
