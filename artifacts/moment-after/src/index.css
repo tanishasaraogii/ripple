@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: #0a0a0a;
+  --color-foreground: #ffffff;
+  --color-border: #222222;
+  --color-input: #222222;
+  --color-ring: #25D366;
+
+  --color-card: #111111;
+  --color-card-foreground: #ffffff;
+  --color-card-border: #222222;
+
+  --color-primary: #25D366;
+  --color-primary-foreground: #000000;
+  
+  --color-secondary: #1a1a1a;
+  --color-secondary-foreground: #ffffff;
+  
+  --color-muted: #1a1a1a;
+  --color-muted-foreground: #888888;
+  
+  --color-accent: #25D366;
+  --color-accent-foreground: #000000;
+
+  --color-destructive: #ff3333;
+  --color-destructive-foreground: #ffffff;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --radius: 0.75rem;
+}
+
+:root {
+  background-color: #0a0a0a;
+  color: #ffffff;
+}
+
+body {
+  background-color: #000000; /* Dark desktop backdrop */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+#root {
+  width: 100%;
+  max-width: 390px;
+  height: 100vh;
+  max-height: 844px; /* iPhone 14 Pro height roughly */
+  background-color: #0a0a0a;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+  border-left: 1px solid #222;
+  border-right: 1px solid #222;
+}
+
+.whatsapp-bg {
+  background-color: #0b141a;
+  background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 10h10v10H10z" fill="rgba(255,255,255,0.02)" /></svg>');
+}
+
+.wa-bubble-tail {
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid #005c4b;
+  border-right: 10px solid transparent;
+}

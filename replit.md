@@ -1,6 +1,6 @@
-# [Project name]
+# The Moment After
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A live-ops demo for Headout that fires a perfectly-timed, personalized WhatsApp message the moment a guest finishes an experience, recommending the ideal next bookable experience nearby — a same-day-second-booking, zero-CAC revenue recovery play.
 
 ## Run & Operate
 

@@ -1,0 +1,227 @@
+# PROJECT: The Moment After — Post-Experience Trigger Engine
+
+## Context
+4-hour solo hackathon project for Headout (experiences/tours booking platform).
+Judged live on stage in a ~3 min demo. Win condition: a working demo that shows
+a WhatsApp-style message firing the moment a tour ends, recommending the perfect
+next experience nearby. This is a revenue recovery play — same-day second
+booking from existing customers at peak travel euphoria. Zero new users needed,
+zero CAC, pure conversion from people who already trust Headout.
+
+## The Problem We're Solving
+After a guest completes an experience, Headout goes silent. That guest is
+standing somewhere amazing, still buzzing, with hours left in their day.
+Headout already knows:
+- What they just did
+- Where the experience was (location in listing)
+- What time it ended (from booking)
+- What's bookable nearby right now
+- Their booking history and preferences
+
+Nobody is sending them anything. We fix that with one perfectly timed,
+hyper-personalized WhatsApp message that fires at experience end time.
+
+## CORE PRINCIPLE: DEMO-FIRST, ZERO EXTERNAL DEPENDENCIES
+The app MUST run fully and demo end-to-end with NO API keys and NO network
+calls. Every core feature works locally. WhatsApp delivery is SIMULATED
+visually — we show the message UI on screen. No real WhatsApp API needed.
+No database. No auth. In-memory state only. NO localStorage/sessionStorage.
+
+## What to Build (single React + Vite app, deploy on Replit)
+
+### 1. SEEDED DATA LAYER
+Hardcode 4 realistic guest profiles with booking history. Each booking has:
+- guest_name, city, experience_name, experience_category
+  (food/museum/adventure/landmark/show/nature)
+- location (lat/lng or just area name e.g. "Champ de Mars, Paris")
+- end_time (use times close to "now" in the demo so trigger fires fast)
+- price_tier (budget/mid/luxury)
+- solo_or_group
+
+Seed these 4 specific profiles:
+1. Sarah — just finished "Eiffel Tower Skip-the-Line", Paris, ends 3:00pm,
+   luxury, group
+2. James — just finished "Tokyo Street Food Tour", Tokyo, ends 2:30pm,
+   mid, solo  
+3. Priya — just finished "Colosseum Underground Tour", Rome, ends 4:00pm,
+   mid, group
+4. Marco — just finished "Barcelona Sagrada Familia Tour", Barcelona,
+   ends 1:45pm, budget, solo
+
+Also seed a NEARBY EXPERIENCES catalogue — 3-4 bookable options per city
+with: name, category, distance_minutes (walking), available_slots,
+price, highlight_line (one punchy sentence about why it's great right now).
+
+Paris nearby: Musée d'Orsay (museum, 8 min, 4 slots, €18,
+"Impressionism's greatest hits, no queue right now"),
+Seine River Sunset Cruise (landmark, 12 min, 6 slots, €24,
+"Golden hour on the water — this slot sells out by 4pm"),
+Montmartre Food Walk (food, 15 min, 3 slots, €32,
+"The locals' Paris, not the tourist one")
+
+Tokyo nearby: Shibuya Crossing Night Walk (landmark, 10 min, unlimited,
+€0, "The world's busiest crossing at dusk — free with Headout guide"),
+Tsukiji Outer Market Snack Tour (food, 18 min, 5 slots, €28,
+"Still fresh, still local, still worth it"),
+teamLab Planets (show, 22 min, 2 slots, €38,
+"Digital art you walk through — last 2 slots today")
+
+Rome nearby: Trastevere Food Tour (food, 12 min, 4 slots, €35,
+"Rome's most authentic neighbourhood, best eaten not photographed"),
+Vatican Museums Fast Track (museum, 20 min, 3 slots, €45,
+"The Sistine Chapel without the wait"),
+Aperitivo Rooftop Experience (food/nightlife, 8 min, 6 slots, €22,
+"Sunset drinks above the city — opens in 45 mins")
+
+Barcelona nearby: Park Güell Guided Tour (landmark, 14 min, 5 slots, €20,
+"Gaudí's fairy-tale park, guided so you actually understand it"),
+Gothic Quarter Food Tour (food, 6 min, 4 slots, €30,
+"Barcelona's oldest streets, best tapas"),
+Barceloneta Sunset Sailing (adventure, 25 min, 3 slots, €55,
+"Mediterranean sailing — last boat of the day")
+
+### 2. RECOMMENDATION ENGINE (deterministic rules, no ML)
+Given a completed experience, select the best next recommendation:
+- NEVER same category as what they just did
+- Prefer experiences ending 2+ hours before sunset (assume sunset 8pm)
+- If solo: weight toward food and adventure
+- If group: weight toward landmark and shows
+- Always pick the option with lowest available_slots first (scarcity signal)
+- Distance must be under 20 min walking
+- Return top 1 recommendation with full details
+
+### 3. MESSAGE COMPOSER
+Given the recommendation, compose a WhatsApp message string:
+Format exactly:
+"[First name]! Your [experience name] just wrapped 🎉
+
+[Recommendation name] is [X] min away and has [N] slots left today.
+
+[highlight_line]
+
+[Price] · Books in 30 seconds 👇
+[fake Headout deep link]"
+
+Keep it under 4 lines. Punchy. No corporate speak. Feels like a friend texted.
+
+### 4. THE TRIGGER DASHBOARD (main UI)
+A clean, mobile-width (390px centered) dashboard showing:
+
+LEFT PANEL — "Live Bookings"
+List of 4 guest cards, each showing:
+- Guest name + experience name
+- City + end time
+- A countdown timer showing time until trigger fires
+- Status badge: UPCOMING / FIRING NOW / SENT
+
+Make Sarah's booking end time = NOW + 8 seconds so the demo trigger fires
+almost immediately after page load. Others fire at +2min, +4min, +6min.
+
+RIGHT PANEL — "Message Preview"
+When a trigger fires:
+- Animate the status badge from UPCOMING → FIRING NOW with a pulse effect
+- Show the composed WhatsApp message in a realistic WhatsApp UI bubble
+  (green bubble, white background, WhatsApp header with guest name)
+- Below the bubble show: "📍 [Recommendation] · [X] min away · [N] slots"
+- A "Book Now" button that when clicked shows a booking confirmation animation
+- Below that show a metric counter: "Same-day second bookings today: X"
+  — starts at 0, increments to 1 when Book Now is clicked
+
+### 5. DEMO FLOW (build this explicitly — this is how it's judged)
+
+SCREEN 1 — Landing
+Headline: "The Moment After"
+Subheadline: "Headout's highest-intent customer is someone who just finished
+an experience. We've been sending them nothing. Until now."
+Button: "See it live →"
+
+SCREEN 2 — Dashboard
+Both panels visible. Countdown running. Judges watch Sarah's timer hit zero.
+
+SCREEN 3 — Trigger fires (automatic, no click needed)
+Sarah's card pulses FIRING NOW. WhatsApp message appears in right panel
+with slide-in animation. Feels like a real notification arriving.
+
+SCREEN 4 — Judge clicks "Book Now"
+Booking confirmation animation. Metric counter increments.
+Show: "Revenue recovered: €18 · CAC: €0"
+
+SCREEN 5 — "What changes" slide (last screen, static)
+Three stats:
+"Same-day second bookings: 0 → measurable in 48hrs of shipping"
+"Customer acquisition cost: €0 — they're already ours"  
+"Trigger latency: <60 seconds from experience end"
+
+### 6. PITCH FRAMING (bake this into the UI copy)
+The app should feel like it's making an argument, not just a demo.
+Every screen should communicate:
+- The gap (silence after experience ends)
+- The insight (peak euphoria = peak conversion intent)  
+- The solution (one message, right moment, right recommendation)
+- The metric (same-day second booking rate)
+
+## Tech Stack
+- React + Vite (Replit template)
+- Tailwind CSS for styling
+- No external UI libraries needed — keep it simple
+- CSS animations for countdown, pulse, slide-in (no Framer Motion needed,
+  saves setup time)
+- NO localStorage/sessionStorage — useState only
+- NO backend — pure frontend, everything in memory
+- Target: mobile-width demo (390px) centered on desktop screen
+
+## Design Direction
+- Dark background (#0a0a0a or deep navy)
+- WhatsApp green (#25D366) for the message bubble and key accents  
+- White text, high contrast
+- The WhatsApp UI should look EXACTLY like WhatsApp — header with
+  guest avatar initial, green bubble, timestamp, double tick
+- Clean, minimal, confident — not a dashboard, more like a live ops view
+- The metric "CAC: €0" should be large and visible — that's the money shot
+
+## Build Order (4 hours — do not deviate)
+Hour 1: Data layer + recommendation engine + message composer.
+  Console.log outputs for all 4 profiles proving recommendations generate.
+Hour 2: Dashboard UI — both panels, guest cards, countdown timers, 
+  status badges. Get Sarah's auto-trigger working at T+8 seconds.
+Hour 3: WhatsApp message UI, slide-in animation, Book Now confirmation,
+  metric counter. Full demo flow working end to end.
+Hour 4: Landing screen, "What changes" screen, polish, deploy on Replit,
+  push to GitHub with README.
+
+## GitHub Submission
+- Init git from the start, commit after each hour
+- README must include:
+  - One paragraph: the problem and solution
+  - How to run (one command)
+  - The demo flow steps
+  - The business case (same-day second booking, zero CAC)
+- Use Headout hackathon GitHub credentials for final push
+  Username: hackin-dev / Password: HeadoutHackin@2026
+  2FA key: VLOMUVLLUKFELTF3 (add to Google Authenticator)
+- Push before 11:30am — do not leave this to the last minute
+
+## Acceptance Criteria
+- Loads instantly on Replit with zero setup beyond npm install + npm run dev
+- Sarah's trigger fires automatically ~8 seconds after page load
+- WhatsApp message appears with correct content for Sarah's profile
+- Book Now increments the metric counter
+- All 4 profiles have different messages (prove personalization)
+- Looks good on 390px mobile width
+- No errors in console
+- GitHub repo has clean commits and a clear README
+
+## What NOT to build
+- No real WhatsApp API integration
+- No database
+- No backend server
+- No auth
+- No map (distance is text only — "8 min away")
+- No payment flow
+- No actual Headout API calls
+- Do not spend time on animations beyond the core trigger pulse +
+  message slide-in
+
+## The One-Line Pitch
+"Every day Headout guests finish an experience and we say nothing.
+The Moment After fixes that — one message, right time, zero acquisition cost."
