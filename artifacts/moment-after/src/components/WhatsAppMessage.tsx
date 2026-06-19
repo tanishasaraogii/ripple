@@ -1,14 +1,14 @@
 import { Guest, Recommendation, discountedPrice } from '../lib/data';
 import { motion } from 'framer-motion';
 
-export default function WhatsAppMessage({ guest, recommendation, countdownLabel, expired }: { guest: Guest, recommendation: Recommendation, countdownLabel: string, expired: boolean }) {
+export default function WhatsAppMessage({ guest, recommendation, onOpenLink }: { guest: Guest, recommendation: Recommendation, onOpenLink: () => void }) {
   const finalPrice = discountedPrice(recommendation);
   const hasDiscount = recommendation.discount_pct > 0 && finalPrice < recommendation.price;
   const priceLine = finalPrice === 0
-    ? "Free · Books in 30 seconds 👇"
+    ? "Free · book in the app 👇"
     : hasDiscount
       ? `Just for finishing today: ${recommendation.discount_pct}% off → €${finalPrice} (was €${recommendation.price}) 👇`
-      : `€${finalPrice} · Books in 30 seconds 👇`;
+      : `€${finalPrice} · book in the app 👇`;
 
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -26,11 +26,14 @@ export default function WhatsAppMessage({ guest, recommendation, countdownLabel,
         {guest.guest_name}! Your {guest.experience_name} just wrapped 🎉{'\n\n'}
         {recommendation.name} is {recommendation.distance_minutes} min away and has {recommendation.available_slots} slots left today.{'\n\n'}
         {recommendation.highlight_line}{'\n\n'}
-        {expired
-          ? '⌛ This offer has expired.'
-          : `⏳ Offer expires in ${countdownLabel} — book before you leave the area.`}{'\n\n'}
+        ⏳ Offer only valid for the next 40 min — tap to book before you leave.{'\n\n'}
         {priceLine}{'\n'}
-        <span className="text-[#027eb5] hover:underline cursor-pointer">headout.com/book/{recommendation.id}</span>
+        <button
+          onClick={onOpenLink}
+          className="text-[#027eb5] hover:underline cursor-pointer text-left break-all"
+        >
+          headout.com/book/{recommendation.id}
+        </button>
       </div>
 
       <div className="flex justify-end items-center gap-1 mt-1 -mb-1">

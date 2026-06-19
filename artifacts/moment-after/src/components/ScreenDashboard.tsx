@@ -189,48 +189,20 @@ export default function ScreenDashboard({ onNext }: { onNext: () => void }) {
                 </div>
 
                 <div className="flex-1 whatsapp-bg p-4 overflow-y-auto flex flex-col justify-end">
-                  <WhatsAppMessage guest={activeGuest} recommendation={activeRec} countdownLabel={countdownLabel} expired={offerExpired} />
+                  <WhatsAppMessage guest={activeGuest} recommendation={activeRec} onOpenLink={() => setChannel('app')} />
 
-                  <motion.div
+                  <motion.button
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 }}
-                    className="mt-4 bg-white p-4 rounded-xl border border-[#ECECEF] shadow-sm"
+                    onClick={() => setChannel('app')}
+                    className="self-center mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#54656f] bg-white/70 backdrop-blur px-3 py-1.5 rounded-full shadow-sm hover:bg-white"
                   >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="text-sm font-bold text-[#2A2A33]">{activeRec.name}</div>
-                      {activeRec.discount_pct > 0 && (
-                        <span className="shrink-0 text-[10px] font-bold text-[#E5006E] bg-[#E5006E]/10 border border-[#E5006E]/30 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                          {activeRec.discount_pct}% off
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-[#6B6B76] mb-3 font-medium">{activeRec.distance_minutes} min away · {activeRec.available_slots} slots left</div>
-                    <div
-                      className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 mb-3 text-[12px] font-semibold ${offerExpired ? 'bg-[#F7F7F8] text-[#9A9AA3] border border-[#ECECEF]' : 'bg-[#E5006E]/10 text-[#E5006E] border border-[#E5006E]/25'}`}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" />
-                      </svg>
-                      {offerExpired ? 'This offer has expired' : `Offer expires in ${countdownLabel}`}
-                    </div>
-                    <div className="flex items-baseline gap-2 mb-4">
-                      <span className="text-lg font-extrabold text-[#2A2A33]">€{discountedPrice(activeRec)}</span>
-                      {activeRec.discount_pct > 0 && (
-                        <span className="text-sm text-[#9A9AA3] line-through">€{activeRec.price}</span>
-                      )}
-                      {activeRec.discount_pct > 0 && (
-                        <span className="text-xs text-[#E5006E] font-semibold">post-experience perk</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleBook(activeRec)}
-                      disabled={offerExpired}
-                      className="w-full bg-primary text-white font-bold py-3 rounded-lg text-sm active:scale-[0.98] transition-transform shadow-md shadow-primary/20 disabled:opacity-40 disabled:active:scale-100"
-                    >
-                      {offerExpired ? 'Offer expired' : `Book Now · €${discountedPrice(activeRec)}`}
-                    </button>
-                  </motion.div>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    Tap the link → opens in the Headout app
+                  </motion.button>
                 </div>
               </>
             ) : (
