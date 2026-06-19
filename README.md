@@ -2,32 +2,53 @@
 
 **One great experience ripples into the next.**
 
-Headout's highest-intent customer is someone who *just finished an experience*. We've been sending them nothing. Until now.
+Ripple turns the most exciting moment of a guest's day — the minutes right after they finish an experience — into the start of their next one. The instant a tour, show, or activity wraps, Ripple sends a warm, personalized WhatsApp message recommending the perfect next experience nearby, with a special post-experience offer ready to book in a single tap.
 
-Ripple is a live-ops demo for Headout that fires a perfectly-timed, personalized WhatsApp message the moment a guest finishes an experience, recommending the ideal next bookable experience nearby — a same-day second-booking, zero-CAC revenue recovery play.
+It's a live-ops growth play for Headout: meet guests at their highest-intent moment, delight them with a recommendation that feels hand-picked, and turn one great memory into two.
 
-## The idea
+## Why this moment matters
 
-A guest finishes, say, a Colosseum tour. Minutes later their phone buzzes: a WhatsApp message from Headout recommending a sunset rooftop aperitivo 7 minutes away — with a post-experience discount that expires in 40 minutes. They tap, book in-app, and get an e-ticket back in the same thread. No ad spend, no re-acquisition cost — just the right nudge at the highest-intent moment.
+A guest who just stepped out of the Colosseum is curious, energized, and already in "explore mode." They're in the city, they have the afternoon ahead of them, and they're in exactly the right mindset to say yes to something wonderful. Ripple meets them there — phone in hand, glow of a great experience still fresh — with a recommendation that fits the moment perfectly.
+
+The result is a same-day second booking that feels like a thoughtful concierge tip rather than a sales pitch. Guests get more out of their trip, and Headout grows revenue from customers it has already won.
+
+## How it works
+
+1. **Sense the finish.** Ripple knows when a guest's experience is wrapping up and lines them up in a live ops queue with a countdown.
+2. **Fire the moment.** The instant the experience ends, a personalized WhatsApp message lands — greeting the guest by name, celebrating what they just did, and recommending the ideal next experience close by.
+3. **Make it irresistible.** Tapping the message opens the Headout app to the recommended experience, complete with a post-experience perk and a friendly countdown that keeps the moment alive.
+4. **Book in a tap.** The guest checks out in seconds.
+5. **Deliver instantly.** A polished e-ticket drops right back into the same WhatsApp thread, with a tappable voucher — closing the loop in the channel the guest already loves.
+
+Throughout the demo, live counters show bookings and revenue climbing as guests convert, making the impact tangible at a glance.
 
 ## The demo
 
-The app is a single-screen, phone-framed simulation:
+Ripple ships as a beautifully animated, phone-framed simulation you can click through end to end:
 
-1. **Landing** — the pitch.
-2. **Ops console** — a live queue of guests whose experiences are about to end, each with a countdown timer.
-3. **The moment fires** — when a guest's timer hits zero, you tap their card to open the WhatsApp thread where the personalized recommendation has just landed.
-4. **The offer** — tapping the message opens the Headout app view with the recommended experience, a post-experience discount, and a 40-minute countdown.
-5. **Booking & e-ticket** — completing payment drops an e-ticket message back into the WhatsApp thread, with a tappable voucher.
+- **Landing** — the vision in one screen.
+- **Ops console** — a live queue of guests about to finish, each with a real-time countdown.
+- **The moment fires** — tap a guest to open the WhatsApp thread where their personalized recommendation has just arrived.
+- **The offer** — the in-app experience page with imagery, highlights, a post-experience perk, and a live offer countdown.
+- **Booking & e-ticket** — complete checkout and watch the e-ticket appear back in the WhatsApp thread.
 
-Running totals (bookings, recovered revenue) update live as guests convert.
+Every interaction is designed to feel like the real thing: authentic WhatsApp styling, Headout's brand language, smooth motion, and thoughtful micro-details.
+
+## Highlights
+
+- **Perfect timing** — engages guests at the peak-intent moment, right after an experience.
+- **Personalized recommendations** — suggestions tuned to what the guest just did, where they are, and how far they'd travel.
+- **Native to WhatsApp** — meets guests in the messaging app they already use every day.
+- **One-tap booking** — a frictionless path from message to confirmed e-ticket.
+- **Same-day second bookings** — grows revenue from existing, already-delighted customers.
+- **Live impact view** — bookings and revenue update in real time as guests convert.
 
 ## Stack
 
-- **Frontend:** React + Vite + Tailwind CSS, Framer Motion for animation
+- **Frontend:** React + Vite + Tailwind CSS
+- **Animation:** Framer Motion
 - **Language:** TypeScript
 - **Monorepo:** pnpm workspaces
-- **State:** in-memory only — no backend, no database (it's a demo)
 - **Type:** Plus Jakarta Sans
 - **Brand:** Headout purple (`#8000FF`) and magenta (`#E5006E`)
 
@@ -38,25 +59,33 @@ pnpm install
 pnpm --filter @workspace/moment-after run dev
 ```
 
-Then open the preview. To typecheck:
+Open the preview to explore the full flow. To typecheck:
 
 ```bash
 pnpm --filter @workspace/moment-after run typecheck
 ```
 
-## Where things live
+## Project structure
 
-This is a pnpm monorepo. The Ripple app is the `moment-after` artifact:
+Ripple lives as the `moment-after` artifact inside a pnpm monorepo:
 
 ```
 artifacts/moment-after/
 ├── index.html
-├── public/experiences/      # experience photos
+├── public/experiences/      # experience photography
 └── src/
-    ├── components/          # ScreenLanding, ScreenDashboard, WhatsApp*, HeadoutVoucher, HeadoutAppOffer, PaymentGateway
-    └── lib/data.ts          # demo guests, experience catalogue, recommendation logic
+    ├── components/          # ScreenLanding, ScreenDashboard, WhatsApp views,
+    │                        # HeadoutVoucher, HeadoutAppOffer, PaymentGateway
+    └── lib/data.ts          # guests, experience catalogue, recommendation logic
 ```
+
+## Roadmap ideas
+
+- Connect to live booking signals to fire in real production conditions.
+- Smarter recommendations powered by guest history and real-time availability.
+- Multi-channel delivery (WhatsApp, app push, email) chosen per guest.
+- A/B-tested offers and timing windows to maximize delight and conversion.
 
 ---
 
-*Built on Replit. Demo only — not affiliated with or endorsed by Headout.*
+*Built on Replit.*
